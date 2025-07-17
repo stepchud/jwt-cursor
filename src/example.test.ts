@@ -1,4 +1,4 @@
-import { JWTDecoder, jwtDecode, jwtDecodeAndValidate, JWTValidationOptions } from './index';
+import { JWTDecoder, jwtDecode, jwtDecodeAndValidate, jwtIsExpired, jwtGetTimeUntilExpiration, jwtValidate, jwtGetPayload, jwtGetHeader, JWTValidationOptions } from './index';
 
 // Example JWT tokens for testing
 const validJWT = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJleHAiOjk5OTk5OTk5OTl9.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c';
@@ -35,7 +35,7 @@ describe('JWT Decoder Examples', () => {
   });
 
   test('JWT validation - valid token', () => {
-    const result = JWTDecoder.decodeAndValidate(validJWT);
+    const result = jwtDecodeAndValidate(validJWT);
     
     expect(result.isValid).toBe(true);
     expect(result.errors).toHaveLength(0);
@@ -44,7 +44,7 @@ describe('JWT Decoder Examples', () => {
   });
 
   test('JWT validation - expired token', () => {
-    const result = JWTDecoder.decodeAndValidate(expiredJWT);
+    const result = jwtDecodeAndValidate(expiredJWT);
     
     expect(result.isValid).toBe(false);
     expect(result.isExpired).toBe(true);
@@ -52,7 +52,7 @@ describe('JWT Decoder Examples', () => {
   });
 
   test('JWT validation - future token (nbf)', () => {
-    const result = JWTDecoder.decodeAndValidate(futureJWT);
+    const result = jwtDecodeAndValidate(futureJWT);
     
     expect(result.isValid).toBe(false);
     expect(result.isNotYetValid).toBe(true);
@@ -77,23 +77,23 @@ describe('JWT Decoder Examples', () => {
   });
 
   test('Get specific parts of JWT', () => {
-    const payload = JWTDecoder.getPayload(validJWT);
-    const header = JWTDecoder.getHeader(validJWT);
+    const payload = jwtGetPayload(validJWT);
+    const header = jwtGetHeader(validJWT);
     
     expect(payload.name).toBe('John Doe');
     expect(header.alg).toBe('HS256');
   });
 
   test('Check if token is expired', () => {
-    expect(JWTDecoder.isExpired(validJWT)).toBe(false);
-    expect(JWTDecoder.isExpired(expiredJWT)).toBe(true);
+    expect(jwtIsExpired(validJWT)).toBe(false);
+    expect(jwtIsExpired(expiredJWT)).toBe(true);
   });
 
   test('Get time until expiration', () => {
-    const timeUntilExp = JWTDecoder.getTimeUntilExpiration(validJWT);
+    const timeUntilExp = jwtGetTimeUntilExpiration(validJWT);
     expect(timeUntilExp).toBeGreaterThan(0);
     
-    const expiredTime = JWTDecoder.getTimeUntilExpiration(expiredJWT);
+    const expiredTime = jwtGetTimeUntilExpiration(expiredJWT);
     expect(expiredTime).toBe(0);
   });
 
@@ -106,7 +106,7 @@ describe('JWT Decoder Examples', () => {
   test('Error handling - malformed token', () => {
     expect(() => {
       JWTDecoder.decode('not.a.jwt');
-    }).toThrow('JWT token must have 2 or 3 parts separated by dots');
+    }).toThrow('Failed to decode JWT: Invalid base64url encoding');
   });
 
   test('Error handling - empty token', () => {
