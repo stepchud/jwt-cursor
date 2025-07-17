@@ -10,7 +10,7 @@
     flake-utils.lib.eachDefaultSystem (system:
       let
         pkgs = nixpkgs.legacyPackages.${system};
-        
+
         # Only support Apple Silicon for speed
         supportedSystems = [ "aarch64-darwin" "x86_64-darwin" ];
 
@@ -19,12 +19,12 @@
 
         # Minimal development shell
         devShell = pkgs.mkShell {
-                packages = with pkgs; [
-        nodejs # or nodejs_18, nodejs_21, etc.
-        nodePackages.typescript
-        nodePackages.typescript-language-server
-        corepack
-      ];
+          packages = with pkgs; [
+            nodejs # or nodejs_18, nodejs_21, etc.
+            nodePackages.typescript
+            nodePackages.typescript-language-server
+            corepack
+          ];
           shellHook = ''
             echo "🚀 JWT Cursor - Minimal Dev Environment"
             echo "Node.js: $(node --version)"
@@ -34,17 +34,17 @@
           '';
         };
       in
-      if builtins.elem system supportedSystems then {
-        devShells.default = devShell;
-      } else {
-        devShells.default = pkgs.mkShell {
-          buildInputs = [];
-          shellHook = ''
-            echo "❌ Unsupported system: ${system}"
-            echo "This flake only supports Apple Silicon (aarch64-darwin)"
-            exit 1
-          '';
-        };
-      }
+        if builtins.elem system supportedSystems then {
+          devShells.default = devShell;
+        } else {
+          devShells.default = pkgs.mkShell {
+            buildInputs = [];
+            shellHook = ''
+              echo "❌ Unsupported system: ${system}"
+              echo "This flake only supports Apple Silicon (aarch64-darwin)"
+              exit 1
+            '';
+          };
+        }
     );
 } 
