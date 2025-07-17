@@ -1,4 +1,4 @@
-import { JWTDecoder, jwtDecode, jwtDecodeAndValidate, jwtIsExpired, jwtGetTimeUntilExpiration, jwtValidate, jwtGetPayload, jwtGetHeader, JWTValidationOptions } from './index';
+import { JWTDecoder, JWTValidationOptions } from './index';
 
 // Example JWT tokens for testing
 const validJWT = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJleHAiOjk5OTk5OTk5OTl9.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c';
@@ -30,12 +30,12 @@ describe('JWT Decoder Examples', () => {
   });
 
   test('Using convenience function', () => {
-    const decoded = jwtDecode(validJWT);
+    const decoded = JWTDecoder.decode(validJWT);
     expect(decoded.payload.name).toBe('John Doe');
   });
 
   test('JWT validation - valid token', () => {
-    const result = jwtDecodeAndValidate(validJWT);
+    const result = JWTDecoder.decodeAndValidate(validJWT);
     
     expect(result.isValid).toBe(true);
     expect(result.errors).toHaveLength(0);
@@ -44,7 +44,7 @@ describe('JWT Decoder Examples', () => {
   });
 
   test('JWT validation - expired token', () => {
-    const result = jwtDecodeAndValidate(expiredJWT);
+    const result = JWTDecoder.decodeAndValidate(expiredJWT);
     
     expect(result.isValid).toBe(false);
     expect(result.isExpired).toBe(true);
@@ -52,7 +52,7 @@ describe('JWT Decoder Examples', () => {
   });
 
   test('JWT validation - future token (nbf)', () => {
-    const result = jwtDecodeAndValidate(futureJWT);
+    const result = JWTDecoder.decodeAndValidate(futureJWT);
     
     expect(result.isValid).toBe(false);
     expect(result.isNotYetValid).toBe(true);
@@ -67,7 +67,7 @@ describe('JWT Decoder Examples', () => {
       expectedAudience: 'myapp'
     };
     
-    const result = jwtDecodeAndValidate(customClaimsJWT, options);
+    const result = JWTDecoder.decodeAndValidate(customClaimsJWT, options);
     
     expect(result.isValid).toBe(true);
     expect(result.jwt.payload.iss).toBe('http://example.com');
@@ -77,23 +77,23 @@ describe('JWT Decoder Examples', () => {
   });
 
   test('Get specific parts of JWT', () => {
-    const payload = jwtGetPayload(validJWT);
-    const header = jwtGetHeader(validJWT);
+    const payload = JWTDecoder.getPayload(validJWT);
+    const header = JWTDecoder.getHeader(validJWT);
     
     expect(payload.name).toBe('John Doe');
     expect(header.alg).toBe('HS256');
   });
 
   test('Check if token is expired', () => {
-    expect(jwtIsExpired(validJWT)).toBe(false);
-    expect(jwtIsExpired(expiredJWT)).toBe(true);
+    expect(JWTDecoder.isExpired(validJWT)).toBe(false);
+    expect(JWTDecoder.isExpired(expiredJWT)).toBe(true);
   });
 
   test('Get time until expiration', () => {
-    const timeUntilExp = jwtGetTimeUntilExpiration(validJWT);
+    const timeUntilExp = JWTDecoder.getTimeUntilExpiration(validJWT);
     expect(timeUntilExp).toBeGreaterThan(0);
     
-    const expiredTime = jwtGetTimeUntilExpiration(expiredJWT);
+    const expiredTime = JWTDecoder.getTimeUntilExpiration(expiredJWT);
     expect(expiredTime).toBe(0);
   });
 
@@ -120,11 +120,11 @@ describe('JWT Decoder Examples', () => {
 export const exampleUsage = () => {
   // Example 1: Simple decoding
   const token = 'your.jwt.token.here';
-  const decoded = jwtDecode(token);
+  const decoded = JWTDecoder.decode(token);
   console.log('User name:', decoded.payload.name);
   
   // Example 2: Validation with options
-  const validationResult = jwtDecodeAndValidate(token, {
+  const validationResult = JWTDecoder.decodeAndValidate(token, {
     expectedIssuer: 'https://your-auth-server.com',
     expectedAudience: 'your-app-id',
     clockSkew: 60 // 1 minute tolerance
@@ -138,10 +138,10 @@ export const exampleUsage = () => {
   }
   
   // Example 3: Check expiration
-  if (jwtIsExpired(token)) {
+  if (JWTDecoder.isExpired(token)) {
     console.log('Token has expired, need to refresh');
   } else {
-    const timeLeft = jwtGetTimeUntilExpiration(token);
+    const timeLeft = JWTDecoder.getTimeUntilExpiration(token);
     console.log(`Token expires in ${timeLeft} seconds`);
   }
 }; 
